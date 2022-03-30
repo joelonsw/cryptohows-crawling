@@ -3,6 +3,8 @@ package com.example.crawler.bloomingbit;
 import com.example.crawler.bloomingbit.dto.BloomingbitItemResponse;
 import com.example.crawler.bloomingbit.dto.BloomingbitResponse;
 import com.example.crawler.slack.SlackService;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class BloomingbitService {
 
     private static final String BLOOMINGBIT_REQUEST_URL = "https://news1.bloomingbit.io/news/wDailyNewsList?&keyword_title=투자";
@@ -32,6 +35,7 @@ public class BloomingbitService {
     private void setRecentNewsId() {
         List<BloomingbitItemResponse> newsItems = parseNewsFromRequest();
         recentNewsId = newsItems.get(0).getId_news_feed();
+        log.info("Bloomingbit set up newsId : " + recentNewsId);
     }
 
     private List<BloomingbitItemResponse> parseNewsFromRequest() {
@@ -39,7 +43,7 @@ public class BloomingbitService {
         return response.getItem_list();
     }
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 300000)
     public void fetchNews() {
         List<BloomingbitItemResponse> newsItems = parseNewsFromRequest();
         String firstNewsId = newsItems.get(0).getId_news_feed();
@@ -52,6 +56,7 @@ public class BloomingbitService {
                 recentNewsId = firstNewsId;
                 break;
             }
+            log.info("Bloomingbit newly added newsId : " + addedNewsId);
             slackService.sendSlackDeployMessage(BLOOMINGBIT_NEWS_ALARM + BLOOMINGBIT_NEWS_LINK + addedNewsId);
         }
     }
