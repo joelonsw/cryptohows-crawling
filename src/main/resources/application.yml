@@ -1,6 +1,8 @@
 spring:
   profiles:
     active: test
+  group:
+    prod: real-slack
 ---
 spring:
   config:
