@@ -3,7 +3,6 @@ package com.example.crawler.bloomingbit;
 import com.example.crawler.bloomingbit.dto.BloomingbitItemResponse;
 import com.example.crawler.bloomingbit.dto.BloomingbitResponse;
 import com.example.crawler.slack.SlackService;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,6 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -35,7 +33,7 @@ public class BloomingbitService {
     private void setRecentNewsId() {
         List<BloomingbitItemResponse> newsItems = parseNewsFromRequest();
         recentNewsId = newsItems.get(0).getId_news_feed();
-        log.info("Bloomingbit set up newsId : " + recentNewsId);
+        log.info("[Bloomingbit] set up newsId : " + recentNewsId);
     }
 
     private List<BloomingbitItemResponse> parseNewsFromRequest() {
@@ -47,16 +45,17 @@ public class BloomingbitService {
     public void fetchNews() {
         List<BloomingbitItemResponse> newsItems = parseNewsFromRequest();
         String firstNewsId = newsItems.get(0).getId_news_feed();
-        if (Objects.equals(recentNewsId, firstNewsId)) {
+        if (recentNewsId.equals(firstNewsId)) {
+            log.info("[Bloomingbit] No news added");
             return;
         }
         for (BloomingbitItemResponse news : newsItems) {
             String addedNewsId = news.getId_news_feed();
-            if (Objects.equals(recentNewsId, addedNewsId)) {
+            if (recentNewsId.equals(addedNewsId)) {
                 recentNewsId = firstNewsId;
-                break;
+                return;
             }
-            log.info("Bloomingbit newly added newsId : " + addedNewsId);
+            log.info("[Bloomingbit] newly added newsId : " + addedNewsId);
             slackService.sendSlackDeployMessage(BLOOMINGBIT_NEWS_ALARM + BLOOMINGBIT_NEWS_LINK + addedNewsId);
         }
     }
