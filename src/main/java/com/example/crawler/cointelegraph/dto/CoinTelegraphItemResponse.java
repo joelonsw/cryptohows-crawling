@@ -1,4 +1,4 @@
-package com.example.crawler.coindesk.dto;
+package com.example.crawler.cointelegraph.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
-public class CoindeskItemResponse {
-    private String _id;
-    private String link;
+public class CoinTelegraphItemResponse {
+    private String id;
+    private String url;
     private String title;
-    private String pubdate;
+    private String flash_date;
 }

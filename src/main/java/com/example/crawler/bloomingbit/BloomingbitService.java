@@ -56,7 +56,7 @@ public class BloomingbitService {
                 return;
             }
             log.info("[Bloomingbit] newly added newsId : " + addedNewsId);
-            slackService.sendSlackDeployMessage(BLOOMINGBIT_NEWS_ALARM + BLOOMINGBIT_NEWS_LINK + addedNewsId);
+            slackService.sendSlackDeployMessage(BLOOMINGBIT_NEWS_ALARM + news.getTtl() + "\n" + BLOOMINGBIT_NEWS_LINK + addedNewsId);
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.crawler.bloomingbit.dto;
+package com.example.crawler.cointelegraph.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
-public class BloomingbitItemResponse {
-    private String id_news_feed;
-    private String reg_dttm;
-    private String ttl;
+public class CoinTelegraphRequest {
+    private String query;
+    private Integer page;
 }

@@ -35,7 +35,7 @@ public class CoindeskService {
     private String hashedId;
 
     @PostConstruct
-    private void setA16zId() {
+    private void setIds() {
         a16zId = parseA16zNews().get(0).get_id();
         log.info("[Coindesk] A16z set up newsId: " + a16zId);
 
@@ -77,7 +77,7 @@ public class CoindeskService {
                 return;
             }
             log.info("[Coindesk] newly added a16z newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + COINDESK_NEWS_LINK + item.getLink());
+            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
     }
 
@@ -97,7 +97,7 @@ public class CoindeskService {
                 return;
             }
             log.info("[Coindesk] newly added sequoia newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + COINDESK_NEWS_LINK + item.getLink());
+            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
     }
 
@@ -117,7 +117,7 @@ public class CoindeskService {
                 return;
             }
             log.info("[Coindesk] newly added hashed newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + COINDESK_NEWS_LINK + item.getLink());
+            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
     }
 }

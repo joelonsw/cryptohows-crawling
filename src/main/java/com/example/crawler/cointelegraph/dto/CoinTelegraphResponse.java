@@ -1,16 +1,16 @@
-package com.example.crawler.bloomingbit.dto;
+package com.example.crawler.cointelegraph.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
-public class BloomingbitItemResponse {
-    private String id_news_feed;
-    private String reg_dttm;
-    private String ttl;
+public class CoinTelegraphResponse {
+    private List<CoinTelegraphItemResponse> posts;
 }
