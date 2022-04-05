@@ -15,9 +15,9 @@ import java.util.List;
 @Slf4j
 public class CoindeskService {
 
-    private static final String COINDESK_REQUEST_A16Z_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=a16z&batchsize=10";
-    private static final String COINDESK_REQUEST_SEQUOIA_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=sequoia&batchsize=10";
-    private static final String COINDESK_REQUEST_HASHED_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=hashed&batchsize=10";
+    private static final String COINDESK_REQUEST_A16Z_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=a16z&batchsize=10&sort=date";
+    private static final String COINDESK_REQUEST_SEQUOIA_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=sequoia&batchsize=10&sort=date";
+    private static final String COINDESK_REQUEST_HASHED_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=hashed&batchsize=10&sort=date";
 
     private static final String COINDESK_NEWS_LINK = "";
     private static final String COINDESK_NEWS_ALARM = "Coindesk에서 검색하여 새로운 기사를 찾았습니다.\n";
