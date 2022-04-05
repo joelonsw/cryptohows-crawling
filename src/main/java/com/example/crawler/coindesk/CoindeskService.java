@@ -20,7 +20,9 @@ public class CoindeskService {
     private static final String COINDESK_REQUEST_HASHED_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=hashed&batchsize=10&sort=date";
 
     private static final String COINDESK_NEWS_LINK = "";
-    private static final String COINDESK_NEWS_ALARM = "Coindesk에서 검색하여 새로운 기사를 찾았습니다.\n";
+    private static final String COINDESK_A16Z_NEWS_ALARM = "Coindesk에서 A16Z로 검색하여 새로운 기사를 찾았습니다.\n";
+    private static final String COINDESK_SEQUOIA_NEWS_ALARM = "Coindesk에서 SEQUOIA로 검색하여 새로운 기사를 찾았습니다.\n";
+    private static final String COINDESK_HASHED_NEWS_ALARM = "Coindesk에서 HASHED로 검색하여 새로운 기사를 찾았습니다.\n";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -77,7 +79,7 @@ public class CoindeskService {
                 return;
             }
             log.info("[Coindesk] newly added a16z newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
+            slackService.sendSlackDeployMessage(COINDESK_A16Z_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
     }
 
@@ -97,7 +99,7 @@ public class CoindeskService {
                 return;
             }
             log.info("[Coindesk] newly added sequoia newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
+            slackService.sendSlackDeployMessage(COINDESK_SEQUOIA_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
     }
 
@@ -117,7 +119,7 @@ public class CoindeskService {
                 return;
             }
             log.info("[Coindesk] newly added hashed newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINDESK_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
+            slackService.sendSlackDeployMessage(COINDESK_HASHED_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
     }
 }

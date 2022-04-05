@@ -22,7 +22,9 @@ public class CoinTelegraphService {
     private static final CoinTelegraphRequest SEQUOIA_REQUEST = new CoinTelegraphRequest("sequoia", 1);
     private static final CoinTelegraphRequest HASHED_REQUEST = new CoinTelegraphRequest("hashed", 1);
 
-    private static final String COINTELEGRAPH_NEWS_ALARM = "Cointelegraph에서 검색하여 새로운 기사를 찾았습니다.\n";
+    private static final String COINTELEGRAPH_A16Z_NEWS_ALARM = "Cointelegraph에서 A16Z로 검색하여 새로운 기사를 찾았습니다.\n";
+    private static final String COINTELEGRAPH_SEQUOIA_NEWS_ALARM = "Cointelegraph에서 SEQUOIA로 검색하여 새로운 기사를 찾았습니다.\n";
+    private static final String COINTELEGRAPH_HASHED_NEWS_ALARM = "Cointelegraph에서 HASHED로 검색하여 새로운 기사를 찾았습니다.\n";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -79,7 +81,7 @@ public class CoinTelegraphService {
                 return;
             }
             log.info("[CoinTelegraph] newly added a16z newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINTELEGRAPH_NEWS_ALARM + item.getTitle() + "\n" + item.getUrl());
+            slackService.sendSlackDeployMessage(COINTELEGRAPH_A16Z_NEWS_ALARM + item.getTitle() + "\n" + item.getUrl());
         }
     }
 
@@ -99,7 +101,7 @@ public class CoinTelegraphService {
                 return;
             }
             log.info("[CoinTelegraph] newly added sequoia newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINTELEGRAPH_NEWS_ALARM + item.getTitle() + "\n" + item.getUrl());
+            slackService.sendSlackDeployMessage(COINTELEGRAPH_SEQUOIA_NEWS_ALARM + item.getTitle() + "\n" + item.getUrl());
         }
     }
 
@@ -119,7 +121,7 @@ public class CoinTelegraphService {
                 return;
             }
             log.info("[CoinTelegraph] newly added hashed newsId : " + addedId);
-            slackService.sendSlackDeployMessage(COINTELEGRAPH_NEWS_ALARM + item.getTitle() + "\n" + item.getUrl());
+            slackService.sendSlackDeployMessage(COINTELEGRAPH_HASHED_NEWS_ALARM + item.getTitle() + "\n" + item.getUrl());
         }
     }
 }
