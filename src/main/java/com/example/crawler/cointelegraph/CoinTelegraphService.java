@@ -21,10 +21,12 @@ public class CoinTelegraphService {
     private static final CoinTelegraphRequest A16Z_REQUEST = new CoinTelegraphRequest("a16z", 1);
     private static final CoinTelegraphRequest SEQUOIA_REQUEST = new CoinTelegraphRequest("sequoia", 1);
     private static final CoinTelegraphRequest HASHED_REQUEST = new CoinTelegraphRequest("hashed", 1);
+    private static final CoinTelegraphRequest PARADIGM_REQUEST = new CoinTelegraphRequest("paradigm", 1);
 
     private static final String COINTELEGRAPH_A16Z_NEWS_ALARM = "Cointelegraph에서 A16Z로 검색하여 새로운 기사를 찾았습니다.\n";
     private static final String COINTELEGRAPH_SEQUOIA_NEWS_ALARM = "Cointelegraph에서 SEQUOIA로 검색하여 새로운 기사를 찾았습니다.\n";
     private static final String COINTELEGRAPH_HASHED_NEWS_ALARM = "Cointelegraph에서 HASHED로 검색하여 새로운 기사를 찾았습니다.\n";
+    private static final String COINTELEGRAPH_PARADIGM_NEWS_ALARM = "Cointelegraph에서 PARADIGM로 검색하여 새로운 기사를 찾았습니다.\n";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -33,6 +35,7 @@ public class CoinTelegraphService {
     private String a16zId;
     private String sequoiaId;
     private String hashedId;
+    private String paradigmId;
 
     public CoinTelegraphService(SlackService slackService) {
         this.slackService = slackService;
@@ -48,6 +51,9 @@ public class CoinTelegraphService {
 
         hashedId = parseHashedNews().get(0).getId();
         log.info("[Cointelegraph] Hashed set up newsId: " + hashedId);
+
+        paradigmId = parseParadigmNews().get(0).getId();
+        log.info("[Cointelegraph] Paradigm set up newsId: " + paradigmId);
     }
 
     private List<CoinTelegraphItemResponse> parseA16zNews() {
@@ -62,6 +68,11 @@ public class CoinTelegraphService {
 
     private List<CoinTelegraphItemResponse> parseHashedNews() {
         CoinTelegraphResponse coinTelegraphResponse = restTemplate.postForObject(COINTELEGRAPH_URL, HASHED_REQUEST, CoinTelegraphResponse.class);
+        return coinTelegraphResponse.getPosts();
+    }
+
+    private List<CoinTelegraphItemResponse> parseParadigmNews() {
+        CoinTelegraphResponse coinTelegraphResponse = restTemplate.postForObject(COINTELEGRAPH_URL, PARADIGM_REQUEST, CoinTelegraphResponse.class);
         return coinTelegraphResponse.getPosts();
     }
 
@@ -122,6 +133,26 @@ public class CoinTelegraphService {
             }
             log.info("[CoinTelegraph] newly added hashed newsId : " + addedId);
             slackService.sendSlackDeployMessage(COINTELEGRAPH_HASHED_NEWS_ALARM + item.getTitle() + "\n" + item.getUrl());
+        }
+    }
+
+    @Scheduled(fixedDelay = 300000)
+    public void fetchParadigmNews() {
+        // Hashed
+        List<CoinTelegraphItemResponse> paradigmItem = parseParadigmNews();
+        String paradigmFirstId = paradigmItem.get(0).getId();
+        if (paradigmId.equals(paradigmFirstId)) {
+            log.info("[CoinTelegraph] Paradigm No news added");
+            return;
+        }
+        for (CoinTelegraphItemResponse item : paradigmItem) {
+            String addedId = item.getId();
+            if (paradigmId.equals(addedId)) {
+                paradigmId = paradigmFirstId;
+                return;
+            }
+            log.info("[CoinTelegraph] newly added paradigm newsId : " + addedId);
+            slackService.sendSlackDeployMessage(COINTELEGRAPH_PARADIGM_NEWS_ALARM + item.getTitle() + "\n" + item.getUrl());
         }
     }
 }
