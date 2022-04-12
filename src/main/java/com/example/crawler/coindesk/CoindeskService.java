@@ -18,11 +18,13 @@ public class CoindeskService {
     private static final String COINDESK_REQUEST_A16Z_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=a16z&batchsize=10&sort=date";
     private static final String COINDESK_REQUEST_SEQUOIA_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=sequoia&batchsize=10&sort=date";
     private static final String COINDESK_REQUEST_HASHED_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=hashed&batchsize=10&sort=date";
+    private static final String COINDESK_REQUEST_PARADIGM_URL = "https://api.queryly.com/json.aspx?queryly_key=d0ab87fd70264c0a&query=paradigm&batchsize=10&sort=date";
 
     private static final String COINDESK_NEWS_LINK = "https://www.coindesk.com";
     private static final String COINDESK_A16Z_NEWS_ALARM = "Coindesk에서 A16Z로 검색하여 새로운 기사를 찾았습니다.\n";
     private static final String COINDESK_SEQUOIA_NEWS_ALARM = "Coindesk에서 SEQUOIA로 검색하여 새로운 기사를 찾았습니다.\n";
     private static final String COINDESK_HASHED_NEWS_ALARM = "Coindesk에서 HASHED로 검색하여 새로운 기사를 찾았습니다.\n";
+    private static final String COINDESK_PARADIGM_NEWS_ALARM = "Coindesk에서 Paradigm으로 검색하여 새로운 기사를 찾았습니다.\n";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -35,6 +37,7 @@ public class CoindeskService {
     private String a16zId;
     private String sequoiaId;
     private String hashedId;
+    private String paradigmId;
 
     @PostConstruct
     private void setIds() {
@@ -46,6 +49,9 @@ public class CoindeskService {
 
         hashedId = parseHashedNews().get(0).get_id();
         log.info("[Coindesk] Hashed set up newsId: " + hashedId);
+
+        paradigmId = parseParadigmNews().get(0).get_id();
+        log.info("[Coindesk] Paradigm set up newsId: " + paradigmId);
     }
 
     private List<CoindeskItemResponse> parseA16zNews() {
@@ -60,6 +66,11 @@ public class CoindeskService {
 
     private List<CoindeskItemResponse> parseHashedNews() {
         CoindeskResponse coindeskResponse = restTemplate.getForObject(COINDESK_REQUEST_HASHED_URL, CoindeskResponse.class);
+        return coindeskResponse.getItems();
+    }
+
+    private List<CoindeskItemResponse> parseParadigmNews() {
+        CoindeskResponse coindeskResponse = restTemplate.getForObject(COINDESK_REQUEST_PARADIGM_URL, CoindeskResponse.class);
         return coindeskResponse.getItems();
     }
 
@@ -120,6 +131,26 @@ public class CoindeskService {
             }
             log.info("[Coindesk] newly added hashed newsId : " + addedId);
             slackService.sendSlackDeployMessage(COINDESK_HASHED_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
+        }
+    }
+
+    @Scheduled(fixedDelay = 300000)
+    public void fetchParadigmNews() {
+        // Hashed
+        List<CoindeskItemResponse> paradigmItem = parseParadigmNews();
+        String paradigmFirstId = paradigmItem.get(0).get_id();
+        if (paradigmId.equals(paradigmFirstId)) {
+            log.info("[Coindesk] Paradigm No news added");
+            return;
+        }
+        for (CoindeskItemResponse item : paradigmItem) {
+            String addedId = item.get_id();
+            if (paradigmId.equals(addedId)) {
+                paradigmId = paradigmFirstId;
+                return;
+            }
+            log.info("[Coindesk] newly added paradigm newsId : " + addedId);
+            slackService.sendSlackDeployMessage(COINDESK_PARADIGM_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
     }
 }
