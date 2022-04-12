@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,6 +66,18 @@ class DovemetricServiceTest {
         for (DovemetricTableDataRowResponse row : rows) {
             System.out.println(row.getCellValuesByColumnId().getFundraisingRound() + " @ " + row.getCellValuesByColumnId().getDate());
         }
+
+        DovemetricTableDataRowResponse firstRow = rows.get(0);
+        String date = firstRow.getCellValuesByColumnId().getDate();
+        for (DovemetricTableDataRowResponse row : rows) {
+            if (Objects.isNull(row.getCellValuesByColumnId().getDate())) {
+                continue;
+            }
+            if (row.getCellValuesByColumnId().getDate().equals(firstRow.getCellValuesByColumnId().getDate())) {
+                System.out.println("Equal!-------------");
+                System.out.println(row.getCellValuesByColumnId().getFundraisingRound() + " @ " + row.getCellValuesByColumnId().getDate());
+            }
+        }
     }
 
     @Test
@@ -78,5 +91,21 @@ class DovemetricServiceTest {
 
         int i = dateBefore.compareTo(dateLater);
         System.out.println("i = " + i);
+    }
+
+    @Test
+    void compareDate() throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        String dateStringBefore = "2022-03-30T00:00:00.000Z";
+        Date dateBefore = formatter.parse(dateStringBefore);
+
+        String dateStringLater = "2022-03-31T00:00:00.000Z";
+        Date dateLater = formatter.parse(dateStringLater);
+
+        String dateStringLater2 = "2022-03-31T00:00:00.000Z";
+        Date dateLater2 = formatter.parse(dateStringLater2);
+
+        assertThat(dateLater.after(dateBefore)).isTrue();
+        assertThat(dateLater.equals(dateLater2)).isTrue();
     }
 }

@@ -15,8 +15,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -27,13 +26,20 @@ public class DovemetricService {
     private static final String REQUEST_ID = "reqy9kjnQp9VdVlKF";
     private static final String ACCESS_POLICY = "%7B%22allowedActions%22%3A%5B%7B%22modelClassName%22%3A%22application%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%22%2C%22action%22%3A%22read%22%7D%2C%7B%22modelClassName%22%3A%22application%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%22%2C%22action%22%3A%22readForDetailView%22%7D%2C%7B%22modelClassName%22%3A%22table%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22read%22%7D%2C%7B%22modelClassName%22%3A%22table%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22readData%22%7D%2C%7B%22modelClassName%22%3A%22table%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22readDataForRowCards%22%7D%2C%7B%22modelClassName%22%3A%22view%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22readRowOrder%22%7D%2C%7B%22modelClassName%22%3A%22view%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22readData%22%7D%2C%7B%22modelClassName%22%3A%22view%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22getMetadataForPrinting%22%7D%2C%7B%22modelClassName%22%3A%22row%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22readDataForDetailView%22%7D%2C%7B%22modelClassName%22%3A%22row%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22createBoxDocumentSession%22%7D%2C%7B%22modelClassName%22%3A%22row%22%2C%22modelIdSelector%22%3A%22apppcI0nClUwo3GCb%20*%22%2C%22action%22%3A%22createDocumentPreviewSession%22%7D%5D%2C%22shareId%22%3A%22shrP7uEmnxbv7dUEV%22%2C%22applicationId%22%3A%22apppcI0nClUwo3GCb%22%2C%22generationNumber%22%3A0%2C%22expires%22%3A%222022-04-28T00%3A00%3A00.000Z%22%2C%22signature%22%3A%22efdff063ac6ebc4d0947704b43d9d2ee09b5a695f2900eb696dfee41e91364a6%22%7D";
 
+    private static final String VC1 = "Hashed";
+    private static final String VC2 = "Sequoia";
+    private static final String VC3 = "Andreessen";
+    private static final String VC4 = "Paradigm";
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     private final SlackService slackService;
 
     private String uriString;
 
-    private String currentFundingRound;
+    private Date currentDate;
+
+    private Set<String> currentDateFundingRound = new HashSet<>();
 
     public DovemetricService(SlackService slackService) {
         this.slackService = slackService;
@@ -65,13 +71,34 @@ public class DovemetricService {
         uriString = uriComponents.toUriString();
 
         DovemetricResponse response = restTemplate.getForObject(uriString, DovemetricResponse.class);
-        currentFundingRound = response.getData()
+        List<DovemetricTableDataRowResponse> rowsAsRecentOrder = response.getData()
                 .getTableData()
-                .getRowsAsRecentOrder()
-                .get(0)
+                .getRowsAsRecentOrder();
+
+        currentDate = rowsAsRecentOrder.get(0)
+                .getCellValuesByColumnId()
+                .toDate();
+
+        int i = 0;
+        Date iterDate = rowsAsRecentOrder.get(i)
+                .getCellValuesByColumnId()
+                .toDate();
+        String iterRound = rowsAsRecentOrder.get(i)
                 .getCellValuesByColumnId()
                 .getFundraisingRound();
-        log.info("[Dovemetrics] Dovemetrics round setup : " + currentFundingRound);
+
+        while (iterDate.equals(currentDate)) {
+            currentDateFundingRound.add(iterRound);
+            log.info("[Dovemetrics] Dovemetrics round setup fundraising round : " + iterRound);
+            i++;
+            iterDate = rowsAsRecentOrder.get(i)
+                    .getCellValuesByColumnId()
+                    .toDate();
+            iterRound = rowsAsRecentOrder.get(i)
+                    .getCellValuesByColumnId()
+                    .getFundraisingRound();
+        }
+        log.info("[Dovemetrics] Dovemetrics round setup date : " + currentDate);
     }
 
     @Scheduled(fixedDelay = 1000000)
@@ -80,21 +107,49 @@ public class DovemetricService {
         List<DovemetricTableDataRowResponse> rowsAsRecentOrder = response.getData()
                 .getTableData()
                 .getRowsAsRecentOrder();
+
+        Date recentDate = rowsAsRecentOrder.get(0)
+                .getCellValuesByColumnId()
+                .toDate();
+
         String recentFundraisingRound = rowsAsRecentOrder.get(0)
                 .getCellValuesByColumnId()
                 .getFundraisingRound();
-        if (recentFundraisingRound.equals(currentFundingRound)) {
-            log.info("[Dovemetrics] Dovemetrics No Round added");
-            return;
-        }
-        for (DovemetricTableDataRowResponse rowResponse : rowsAsRecentOrder) {
-            String fundraisingRound = rowResponse.getCellValuesByColumnId().getFundraisingRound();
-            if (currentFundingRound.equals(fundraisingRound)) {
-                currentFundingRound = recentFundraisingRound;
-                return;
+
+        Date iterDate = recentDate;
+        String iterRound = recentFundraisingRound;
+
+        int i = 0;
+        Set<String> newDateFundraisingRound = new HashSet<>();
+
+        while (iterDate.after(currentDate) || iterDate.equals(currentDate)) {
+            if (iterDate.after(currentDate)) {
+                newDateFundraisingRound.add(iterRound);
+                log.info("[Dovemetrics] newly added round : " + iterRound);
+                slackService.sendSlackDeployMessage(
+                        generateMessage(rowsAsRecentOrder.get(i).getCellValuesByColumnId())
+                );
             }
-            log.info("[Dovemetrics] newly added round : " + fundraisingRound);
-            slackService.sendSlackDeployMessage(generateMessage(rowResponse.getCellValuesByColumnId()));
+            if (iterDate.equals(currentDate) && !currentDateFundingRound.contains(iterRound)) {
+                currentDateFundingRound.add(iterRound);
+                log.info("[Dovemetrics] newly added round : " + iterRound);
+                slackService.sendSlackDeployMessage(
+                        generateMessage(rowsAsRecentOrder.get(i).getCellValuesByColumnId())
+                );
+            }
+
+            i++;
+            iterDate = rowsAsRecentOrder.get(i)
+                    .getCellValuesByColumnId()
+                    .toDate();
+            iterRound = rowsAsRecentOrder.get(i)
+                    .getCellValuesByColumnId()
+                    .getFundraisingRound();
+        }
+
+        if (!newDateFundraisingRound.isEmpty()) {
+            currentDateFundingRound = newDateFundraisingRound;
+            currentDate = recentDate;
         }
     }
 
@@ -108,6 +163,10 @@ public class DovemetricService {
         String description = "Description : " + dataItemResponse.getDescription() + "\n";
         String website = "Website : " + dataItemResponse.getWebsite() + "\n";
         String announcement = "Announcement : " + dataItemResponse.getAnnouncement() + "\n";
-        return fundraisingRound + date + amount + investors + category + detailCategory + detailCategory + description + website + announcement;
+
+        if (investors.contains(VC1) || investors.contains(VC2) || investors.contains(VC3) || investors.contains(VC4)) {
+            return "UPLOAD!!!!!!!!!!!!\n" + fundraisingRound + date + amount + investors + category + detailCategory + description + website + announcement;
+        }
+        return fundraisingRound + date + amount + investors + category + detailCategory + description + website + announcement;
     }
 }
