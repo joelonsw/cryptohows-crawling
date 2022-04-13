@@ -92,6 +92,7 @@ public class CoindeskService {
             log.info("[Coindesk] newly added a16z newsId : " + addedId);
             slackService.sendSlackDeployMessage(COINDESK_A16Z_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
+        a16zId = a16zFirstId;
     }
 
     @Scheduled(fixedDelay = 300000)
@@ -112,6 +113,7 @@ public class CoindeskService {
             log.info("[Coindesk] newly added sequoia newsId : " + addedId);
             slackService.sendSlackDeployMessage(COINDESK_SEQUOIA_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
+        sequoiaId = sequoiaFirstId;
     }
 
     @Scheduled(fixedDelay = 300000)
@@ -132,6 +134,7 @@ public class CoindeskService {
             log.info("[Coindesk] newly added hashed newsId : " + addedId);
             slackService.sendSlackDeployMessage(COINDESK_HASHED_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
+        hashedId = hashedFirstId;
     }
 
     @Scheduled(fixedDelay = 300000)
@@ -152,5 +155,6 @@ public class CoindeskService {
             log.info("[Coindesk] newly added paradigm newsId : " + addedId);
             slackService.sendSlackDeployMessage(COINDESK_PARADIGM_NEWS_ALARM + item.getTitle() + "\n" + COINDESK_NEWS_LINK + item.getLink());
         }
+        paradigmId = paradigmFirstId;
     }
 }
