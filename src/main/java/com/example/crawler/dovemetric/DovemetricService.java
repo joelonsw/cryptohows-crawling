@@ -45,18 +45,20 @@ public class DovemetricService {
         this.slackService = slackService;
     }
 
-    @PostConstruct
+//    @PostConstruct
     private void getInfos() {
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         interceptors.add(new HttpHeaderInterceptor("Host", "airtable.com"));
-        interceptors.add(new HttpHeaderInterceptor("x-airtable-client-queue-time", "62.400000005960464"));
+        interceptors.add(new HttpHeaderInterceptor("Cookie", "62.400000005960464"));
         interceptors.add(new HttpHeaderInterceptor("x-airtable-application-id", "apppcI0nClUwo3GCb"));
         interceptors.add(new HttpHeaderInterceptor("x-airtable-inter-service-client", "webClient"));
-        interceptors.add(new HttpHeaderInterceptor("x-airtable-inter-service-client-code-version", "7019ab336c6d5ba622f00d61047e6e8d082118f2"));
-        interceptors.add(new HttpHeaderInterceptor("x-airtable-page-load-id", "pglMki4RsniCMp1T7"));
+        interceptors.add(new HttpHeaderInterceptor("x-airtable-page-load-id", "pgloqtCqWHAJuN56u"));
         interceptors.add(new HttpHeaderInterceptor("X-Requested-With", "XMLHttpRequest"));
         interceptors.add(new HttpHeaderInterceptor("x-time-zone", "Asia/Seoul"));
         interceptors.add(new HttpHeaderInterceptor("x-user-locale", "ko"));
+        interceptors.add(new HttpHeaderInterceptor("ot-tracer-sampled", "true"));
+        interceptors.add(new HttpHeaderInterceptor("ot-tracer-spanid", "264c3dae177cb5c6"));
+        interceptors.add(new HttpHeaderInterceptor("ot-tracer-traceid", "51e44c6d16d6dea5"));
         restTemplate.setInterceptors(interceptors);
 
         DefaultUriBuilderFactory defaultUriBuilderFactory = new DefaultUriBuilderFactory();
@@ -101,7 +103,7 @@ public class DovemetricService {
         log.info("[Dovemetrics] Dovemetrics round setup date : " + currentDate);
     }
 
-    @Scheduled(fixedDelay = 1000000)
+//    @Scheduled(fixedDelay = 1000000)
     public void fetchDovemetric() {
         DovemetricResponse response = restTemplate.getForObject(uriString, DovemetricResponse.class);
         List<DovemetricTableDataRowResponse> rowsAsRecentOrder = response.getData()
